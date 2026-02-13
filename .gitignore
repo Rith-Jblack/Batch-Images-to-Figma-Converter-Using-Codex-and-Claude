@@ -1,0 +1,22 @@
+# Environment / secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Input images (user content)
+1-images-to-convert/*
+!1-images-to-convert/.gitkeep
+
+# Generated output
+2-image-converted/*
+!2-image-converted/.gitkeep
+
+# Archived images
+3-image-archive/*
+!3-image-archive/.gitkeep
+
+# Claude Code local settings
+.claude/

@@ -1,0 +1,102 @@
+You are a Senior UI/UX Designer. Convert the screenshot into a Figma-ready SVG.
+
+## STEP 1: Read image
+Read: __IMAGE_PATH__
+
+## STEP 2: Write SVG
+Write to: __OUTPUT_PATH__
+
+Generate SVG with TWO sections side-by-side:
+- LEFT: Main UI (1:1 copy of screenshot)
+- RIGHT: Component Variants panel (button/dropdown states for Figma prototyping)
+
+## RULES
+
+1. **NO `<filter>`** — no feDropShadow, feGaussianBlur. Figma rasterizes them = blurry text.
+2. **Emoji icons in main UI** — use `<text>` with Unicode, NOT `<symbol>` paths:
+   Film:`&#127910;` Disc:`&#128191;` Gear:`&#9881;` Scissors:`&#9986;` Folder:`&#128194;` Clock:`&#9201;`
+3. **No duplicates in main UI** — each element ONCE. No `opacity="0"` groups.
+4. **Gradients** — use `<linearGradient>` for backgrounds and action buttons, not flat colors.
+5. **Subtle borders** — `stroke-width="1.5" opacity="0.15"` on containers.
+6. **viewBox** wide enough for both panels AND tall enough for the variants panel. The RIGHT panel is usually taller than the LEFT. Calculate: last variant y-position + ~80px. Typically `viewBox="0 0 1160 680"` or taller.
+
+## SVG SKELETON
+
+```xml
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 680" width="1160" height="680">
+<defs>
+  <style>
+    :root { /* colors from screenshot */ }
+    text { font-family: "Inter","Segoe UI","Noto Sans Khmer","Khmer OS",sans-serif; }
+  </style>
+  <linearGradient id="bg-gradient" x1="0" y1="0" x2="0" y2="1">...</linearGradient>
+  <linearGradient id="btn-action-gradient" x1="0" y1="0" x2="0" y2="1">...</linearGradient>
+  <symbol id="chevron-down" viewBox="0 0 12 8"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="chevron-up" viewBox="0 0 12 8"><path d="M1 7l5-5 5 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="checkmark" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3" stroke="#E84893" stroke-width="2" fill="none" stroke-linecap="round"/></symbol>
+</defs>
+
+<!-- LEFT: Main UI -->
+<g id="Background">
+  <rect width="560" height="380" fill="url(#bg-gradient)" rx="8"/>
+  <rect width="560" height="380" rx="8" fill="none" stroke="#E84893" stroke-width="1.5" opacity="0.15"/>
+</g>
+<g id="Frame/Main" transform="translate(20,12)">
+  <g id="Frame/Header"><!-- emoji icon + title + subtitle --></g>
+  <g id="Frame/Content" transform="translate(0,38)"><!-- rows: inputs, buttons, dropdown, progress, preview --></g>
+</g>
+
+<!-- RIGHT: Component Variants (REQUIRED) -->
+<g id="Frame/ComponentVariants" transform="translate(590,0)">
+  <text x="16" y="24" font-size="14" font-weight="700" fill="#FFFFFF">Component Variants</text>
+  <text x="16" y="40" font-size="10" fill="#9E9AB5">Use these in Figma for prototyping interactions</text>
+  <line x1="16" y1="50" x2="540" y2="50" stroke="#E84893" stroke-width="1" opacity="0.3"/>
+
+  <g id="Variant/Dropdown/Closed" transform="translate(16,64)">
+    <text font-size="10" fill="#E84893" font-weight="600">DROPDOWN / CLOSED</text>
+    <!-- white rect + value text + chevron-down -->
+  </g>
+  <g id="Variant/Dropdown/Hover" transform="translate(16,120)">
+    <text font-size="10" fill="#E84893" font-weight="600">DROPDOWN / HOVER</text>
+    <!-- white rect + subtle border + value text + chevron-down -->
+  </g>
+  <g id="Variant/Dropdown/Open" transform="translate(16,176)">
+    <text font-size="10" fill="#E84893" font-weight="600">DROPDOWN / OPEN (ACTIVE)</text>
+    <!-- white rect + accent border stroke-width="2" + value text + chevron-up -->
+  </g>
+  <g id="Variant/OptionItem/Default" transform="translate(16,240)">
+    <text font-size="10" fill="#E84893" font-weight="600">OPTION ITEM / DEFAULT</text>
+    <!-- white rect + text row -->
+  </g>
+  <g id="Variant/OptionItem/Hover" transform="translate(16,296)">
+    <text font-size="10" fill="#E84893" font-weight="600">OPTION ITEM / HOVER</text>
+    <!-- subtle pink bg + text row -->
+  </g>
+  <g id="Variant/OptionItem/Selected" transform="translate(16,352)">
+    <text font-size="10" fill="#E84893" font-weight="600">OPTION ITEM / SELECTED</text>
+    <!-- pink bg + accent left bar + accent text + checkmark -->
+  </g>
+  <!-- Create a separate button variant row for EACH button type found in the screenshot -->
+  <!-- Example: if screenshot has a "Browse" button AND a "Cut" button, make TWO rows -->
+  <g id="Variant/Button/BrowseStates" transform="translate(16,416)">
+    <text font-size="10" fill="#E84893" font-weight="600">BROWSE BUTTON: DEFAULT | HOVER | PRESSED</text>
+    <!-- 3 buttons side-by-side: default, hover (lighter), pressed (darker) -->
+  </g>
+  <g id="Variant/Button/ActionStates" transform="translate(16,486)">
+    <text font-size="10" fill="#E84893" font-weight="600">ACTION BUTTON: DEFAULT | HOVER | PRESSED</text>
+    <!-- 3 buttons side-by-side: default gradient, hover (lighter), pressed (darker) -->
+  </g>
+  <!-- Add more button rows if needed, spacing ~70px apart -->
+</g>
+</svg>
+```
+
+## KEY DETAILS
+- Adapt ALL text/values/colors to match the actual screenshot
+- Button labels in variants = actual labels from screenshot
+- Dropdown values in variants = actual values from screenshot
+- Fill in each variant section with real `<rect>` and `<text>` elements (the comments above are placeholders)
+- Main UI icons = emoji `<text>`, variants panel icons = `<symbol>` `<use>` (chevrons, checkmarks)
+
+## OUTPUT
+After writing the file, respond ONLY: CONVERSION_COMPLETE
