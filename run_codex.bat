@@ -1,6 +1,8 @@
 @echo off
+pushd "%~dp0"
 set AI_PROVIDER=codex
-python3 "%~dp0convert.py"
+python3 "%CD%\convert.py"
 if errorlevel 1 (
-    python "%~dp0convert.py"
+    python "%CD%\convert.py"
 )
+popd

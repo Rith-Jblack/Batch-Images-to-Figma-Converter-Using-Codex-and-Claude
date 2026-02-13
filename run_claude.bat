@@ -1,5 +1,7 @@
 @echo off
-python3 "%~dp0convert.py"
+pushd "%~dp0"
+python3 "%CD%\convert.py"
 if errorlevel 1 (
-    python "%~dp0convert.py"
+    python "%CD%\convert.py"
 )
+popd

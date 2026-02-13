@@ -18,7 +18,7 @@ CLAUDE_DEFAULT_PARALLEL = 3
 CLAUDE_DEFAULT_TIMEOUT = 600  # seconds
 
 # -- Codex CLI defaults -------------------------------------------------------
-CODEX_DEFAULT_MODEL = "o4-mini"
+CODEX_DEFAULT_MODEL = ""  # empty = let Codex CLI use its own default
 CODEX_DEFAULT_SANDBOX = "workspace-write"
 CODEX_DEFAULT_PARALLEL = 3
 CODEX_DEFAULT_TIMEOUT = 600  # seconds

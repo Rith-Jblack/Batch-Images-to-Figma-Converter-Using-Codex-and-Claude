@@ -45,7 +45,7 @@ CLAUDE_DEBUG=0
 CLAUDE_TIMEOUT=600
 
 # Codex settings
-CODEX_MODEL=o4-mini
+# CODEX_MODEL=             # leave empty for Codex CLI default (recommended)
 CODEX_SANDBOX=workspace-write
 CODEX_PARALLEL=3
 
@@ -71,8 +71,9 @@ CLAUDE_DEBUG=1 python3 convert.py                       # Debug output
 | `claude-sonnet-4-5-20250929` | ~1 min | Good | ~$0.60 |
 | `claude-opus-4-6` | ~3 min | Best | ~$1.50 |
 | `claude-haiku-4-5-20251001` | ~30s | Basic | ~$0.10 |
-| `o4-mini` (Codex) | ~1 min | Good | — |
-| `o3` (Codex) | ~2 min | Higher | — |
+| *(Codex default)* | ~2 min | Good | — |
+| `o4-mini` (Codex) | ~1 min | Good | API account required |
+| `o3` (Codex) | ~2 min | Higher | API account required |
 
 ## Project Structure
 

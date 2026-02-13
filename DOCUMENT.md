@@ -135,7 +135,7 @@ py/
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `CODEX_MODEL` | `o4-mini` | Codex model to use |
+| `CODEX_MODEL` | *(Codex default)* | Codex model to use (leave empty for Codex CLI default) |
 | `CODEX_SANDBOX` | `workspace-write` | Codex sandbox level |
 | `CODEX_PARALLEL` | `3` | Max concurrent conversions |
 | `CODEX_DEBUG` | `0` | Set to `1` for verbose output |
@@ -183,10 +183,13 @@ cp .env.codex.example .env
 
 #### Codex Models
 
-| Model | ID | Speed | Quality |
-|-------|----|-------|---------|
-| O4 Mini | `o4-mini` | ~1 min | Good |
-| O3 | `o3` | ~2 min | Higher |
+| Model | ID | Speed | Quality | Note |
+|-------|----|-------|---------|------|
+| *(default)* | — | ~2 min | Good | Recommended — uses Codex CLI default model |
+| O4 Mini | `o4-mini` | ~1 min | Good | Requires API account |
+| O3 | `o3` | ~2 min | Higher | Requires API account |
+
+> **Note:** Some Codex models (e.g., `o3`, `o4-mini`) require an OpenAI API account. If you're using a ChatGPT account, leave `CODEX_MODEL` empty to use the Codex CLI default.
 
 ---
 
@@ -229,7 +232,7 @@ CLAUDE_MODEL=claude-opus-4-6 python3 convert.py
 # Use Codex instead of Claude
 AI_PROVIDER=codex python3 convert.py
 
-# Use Codex with specific model
+# Use Codex with specific model (requires API account for o3/o4-mini)
 AI_PROVIDER=codex CODEX_MODEL=o3 python3 convert.py
 
 # Process 5 images at once
@@ -248,6 +251,10 @@ INPUT_DIR=/path/to/screenshots OUTPUT_DIR=/path/to/output python3 convert.py
 ### Windows PowerShell
 
 ```powershell
+$env:AI_PROVIDER="codex"
+python3 convert.py
+
+# Or with a specific model (requires API account):
 $env:AI_PROVIDER="codex"
 $env:CODEX_MODEL="o3"
 python3 convert.py
@@ -425,11 +432,12 @@ claude -p "<prompt>" \
 **Codex:**
 ```bash
 codex exec \
-  --model o4-mini \
+  --full-auto \
   --sandbox workspace-write \
   --json \
   --image /path/to/image.png \
-  "<prompt>"
+  -
+# prompt is piped via stdin (avoids OS command-line length limits)
 ```
 
 ---
@@ -475,7 +483,8 @@ After conversion:
 | `codex CLI not found` | Codex CLI not installed | Install: `npm install -g @openai/codex` |
 | `SyntaxError: f-string` | Running with Python 2 | Use `python3 convert.py` or `run.bat` |
 | `EOFError: EOF` | `input()` in non-interactive shell | Normal when running from scripts; ignore |
-| `[FAIL]` on an image | AI couldn't generate valid SVG | Re-run, or try with a different model |
+| `[FAIL]` on an image | AI couldn't generate valid SVG | Check the error message; re-run or try a different model |
+| `model not supported` (Codex) | Model unavailable for your account type | Unset `CODEX_MODEL` to use the Codex CLI default, or use a supported model |
 | Blurry text in Figma | SVG has `<filter>` elements | Prompt enforces no-filter rule; re-run |
 | Timeout (600s) | Image too complex | Increase `CLAUDE_TIMEOUT` or `CODEX_TIMEOUT` in .env |
 

@@ -32,8 +32,8 @@ def load_config():
 
     Returns a dict with normalized keys.
     """
-    script_dir = Path(__file__).resolve().parent.parent  # py/
-    project_dir = script_dir.parent                       # figma-converter/
+    script_dir = Path(__file__).resolve().parent.parent  # Images-to-Figma/
+    project_dir = script_dir                              # same as script_dir (keep all paths inside this folder)
 
     # Load .env (does NOT override existing env vars)
     load_dotenv(script_dir / ".env")

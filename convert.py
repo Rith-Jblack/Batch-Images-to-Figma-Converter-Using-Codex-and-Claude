@@ -93,15 +93,22 @@ def build_claude_command(prompt, img, cfg):
 
 
 def build_codex_command(prompt, img, cfg):
-    """Build the subprocess command list for Codex CLI."""
-    return [
+    """Build the subprocess command list for Codex CLI.
+
+    Returns (cmd_list, stdin_text).  The prompt is passed via stdin
+    (using '-') because it can exceed the OS command-line length limit.
+    """
+    cmd = [
         cfg["cli_path"], "exec",
-        "--model", cfg["model"],
+        "--full-auto",
         "--sandbox", cfg["sandbox"],
         "--json",
         "--image", str(img),
-        prompt,
     ]
+    if cfg["model"]:
+        cmd.extend(["--model", cfg["model"]])
+    cmd.append("-")  # read prompt from stdin
+    return cmd
 
 
 def build_command(prompt, img, cfg):
@@ -235,10 +242,16 @@ def convert_image(img, prompt_template, cfg):
             display_cmd = " ".join(c if c != prompt else "[prompt]" for c in cmd)
             print(f"    {C.DIM}CMD: {display_cmd}{C.RESET}")
 
+        # Codex receives the prompt via stdin; Claude via -p flag
+        stdin_text = prompt if provider == PROVIDER_CODEX else None
+
         result = subprocess.run(
             cmd,
+            input=stdin_text,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=cfg["timeout"],
         )
 
@@ -249,13 +262,34 @@ def convert_image(img, prompt_template, cfg):
         if cfg["debug"] and result.stderr:
             print(f"    {C.DIM}{provider} stderr ({filename}): {result.stderr[:300]}{C.RESET}")
 
+        # Surface errors from the CLI (e.g. model not supported)
+        if result.returncode != 0:
+            error_msg = ""
+            if result.stderr:
+                error_msg = result.stderr.strip()[:200]
+            # Codex streams errors as JSONL on stdout
+            if not error_msg and result.stdout:
+                for line in result.stdout.splitlines():
+                    try:
+                        ev = json.loads(line)
+                        if ev.get("type") == "error":
+                            error_msg = ev.get("message", "")[:200]
+                            break
+                    except (json.JSONDecodeError, AttributeError):
+                        pass
+            if error_msg:
+                elapsed = time.time() - img_start
+                return (filename, False, elapsed, 0, error_msg, tokens)
+
     except subprocess.TimeoutExpired:
-        pass
+        elapsed = time.time() - img_start
+        return (filename, False, elapsed, 0, "timeout", tokens)
     except FileNotFoundError:
         elapsed = time.time() - img_start
         return (filename, False, elapsed, 0, "cli_not_found", tokens)
-    except Exception:
-        pass
+    except Exception as exc:
+        elapsed = time.time() - img_start
+        return (filename, False, elapsed, 0, str(exc)[:200], tokens)
     finally:
         try:
             os.unlink(prompt_file)
@@ -336,7 +370,7 @@ def main():
     print(f"  {colorize('Source:', C.CYAN)}   {cfg['input_dir']}")
     print(f"  {colorize('Output:', C.CYAN)}   {cfg['output_dir']}")
     print(f"  {colorize('Archive:', C.CYAN)}  {cfg['archive_dir']}")
-    print(f"  {colorize('Model:', C.CYAN)}    {colorize(cfg['model'], C.BOLD)}")
+    print(f"  {colorize('Model:', C.CYAN)}    {colorize(cfg['model'] or '(default)', C.BOLD)}")
     if cfg["max_turns"] is not None:
         print(f"  {colorize('Turns:', C.CYAN)}    {cfg['max_turns']}")
     print(f"  {colorize('Images:', C.CYAN)}   {colorize(str(total), C.BOLD)} file(s) found")
@@ -382,6 +416,9 @@ def main():
                 print(colorize(f"    Error: '{cli_name}' CLI not found. Make sure it's installed and in PATH.", C.RED))
                 input("\n  Press Enter to exit...")
                 sys.exit(1)
+
+            if error and error not in ("cli_not_found",):
+                print(f"    {colorize('Error:', C.RED)} {error}")
 
             # Accumulate token usage
             total_tokens += tokens["total"]
